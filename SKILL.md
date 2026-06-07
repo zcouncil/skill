@@ -1,19 +1,18 @@
 ---
 name: zcouncil
 description: >
-  Use zcouncil when a user wants multiple independent AI perspectives, model
-  comparison, dissent, architecture/code/product review, product or strategy
-  critique, or help integrating zcouncil through Pi, MCP, the CLI, or the
-  TypeScript SDK.
+  Use zcouncil when a user wants multiple independent AI perspectives,
+  disagreement, model comparison, architecture/code/product review, or strategy
+  critique from an agent with shell access. Prefer the zcouncil CLI.
 version: 0.1.0
 license: MIT
 ---
 
 # zcouncil
 
-zcouncil runs a council of AI models from one prompt. Use it when independent perspectives, disagreement, or model comparison are more valuable than a single synthesized answer.
+zcouncil runs a council of AI models from one prompt. Use the CLI when independent perspectives, disagreement, or model comparison are more valuable than a single synthesized answer.
 
-## When to use zcouncil
+## When To Use
 
 Use zcouncil for:
 
@@ -25,7 +24,7 @@ Use zcouncil for:
 
 Do not use zcouncil for simple factual questions that one model can answer directly.
 
-## Prompting guidance
+## Prompting
 
 Council prompts work best when they are neutral and complete.
 
@@ -43,101 +42,65 @@ Avoid:
 - Asking council members merely to agree with a plan.
 - Sending secrets, credentials, customer data, or regulated data unless the user explicitly authorizes it and the selected zcouncil deployment is appropriate for that data.
 
-## Using zcouncil from an agent
+## CLI
 
-Prefer the integration already available in the current environment.
+Prefer `@zcouncil/cli` from shell-capable agents.
 
-### Pi
-
-If the current agent is Pi and `@zcouncil/pi` is installed, use the `zcouncil` tool for council requests.
-
-Default tool call:
-
-```txt
-zcouncil({})
-```
-
-That asks the default council about the latest user message. Results arrive asynchronously as follow-up context messages.
-
-If the Pi package is not installed, tell the user to run:
-
-```sh
-pi install npm:@zcouncil/pi
-```
-
-Then, inside Pi, the user should run:
-
-```txt
-/zcouncil login
-```
-
-Do not ask for or accept zcouncil API tokens in chat or tool arguments.
-
-### MCP
-
-Use the hosted MCP server when the current client has zcouncil configured as an MCP tool.
-
-Endpoint for humans to configure outside chat:
-
-```txt
-https://api.zcouncil.com/mcp
-```
-
-The MCP server exposes one main tool:
-
-- `run` — runs sandboxed JavaScript council code.
-
-Example MCP payload:
-
-```json
-{
-  "code": "return council.run(`Review this architecture and recommend next steps.`)"
-}
-```
-
-MCP scripts do not automatically receive the caller's chat transcript. Include relevant context in the string passed to `council.run()` or `council.ask()`.
-
-Available script globals:
-
-- `council.run(input)` — ask the default/Auto council.
-- `council.ask(memberId, input, description)` — ask one member.
-- `council.members()` — list valid member IDs.
-- `council.profiles()` — list saved council profiles.
-- `ui.status(text)` — emit a short visible progress update.
-- `orchestrator.checkpoint({ description, prompt })` — visible intermediate checkpoint for multi-step hosted MCP flows.
-- Native `Promise.all()` / `Promise.allSettled()` — run member calls concurrently.
-
-Example: ask two members concurrently.
-
-```json
-{
-  "code": "const input = `Should we move this worker to a Durable Object?`;\nconst [architecture, rollout] = await Promise.all([\n  council.ask('anthropic_claude_opus_4_7', input, 'Review the architecture deeply'),\n  council.ask('openai_gpt_5_4_mini', input, 'Suggest practical rollout steps')\n]);\nreturn { architecture, rollout };"
-}
-```
-
-The sandbox has no filesystem, secrets, outbound network, imports, `eval`, `Function`, or `globalThis` access. Return small JSON-serializable outputs or notes.
-
-### CLI
-
-Use `@zcouncil/cli` when the current environment has shell access but no MCP/Pi tool, or when the user wants local Codex/Claude Code subscriptions to power supported council members.
-
-Install/run:
+Start with help:
 
 ```sh
 npx -y @zcouncil/cli --help
 ```
 
-Direct council calls after the user has configured auth:
+Run the default council:
 
 ```sh
-npx -y @zcouncil/cli run "Review this plan"
+npx -y @zcouncil/cli run "Review this plan and list the main risks."
+```
+
+Pipe a larger prompt:
+
+```sh
 npx -y @zcouncil/cli run - < prompt.md
-npx -y @zcouncil/cli ask anthropic_claude_opus_4_7 "Critique this migration"
+```
+
+Ask one member:
+
+```sh
+npx -y @zcouncil/cli ask anthropic_claude_opus_4_7 "Deeply critique this migration."
+```
+
+List available members and profiles:
+
+```sh
 npx -y @zcouncil/cli members --json
 npx -y @zcouncil/cli profiles --json
 ```
 
-Local bridge setup:
+Run code mode when the user needs scripted council calls:
+
+```sh
+npx -y @zcouncil/cli exec 'return council.run("Review this architecture")'
+```
+
+Read from a file or stdin for longer code:
+
+```sh
+npx -y @zcouncil/cli exec ./review.mjs
+npx -y @zcouncil/cli exec - < review.mjs
+```
+
+## Auth And Bridge
+
+If auth is missing, direct the user to create a token at:
+
+```txt
+https://zcouncil.com/chat?action=new-token
+```
+
+Do not ask for or accept zcouncil API tokens in chat.
+
+To let zcouncil route supported members through local Codex or Claude Code subscriptions, start the bridge:
 
 ```sh
 npm i -g @openai/codex
@@ -148,54 +111,13 @@ npx -y @zcouncil/cli bridge
 
 Leave the bridge running while using zcouncil. If the terminal closes, the local bridge disconnects and hosted routing continues for models that support it.
 
-The zcouncil API token is stored locally under `~/.zcouncil/tokens/`, scoped by bridge/API URL. Do not ask users to paste tokens into agent chat.
+The zcouncil API token is stored locally under `~/.zcouncil/tokens/`, scoped by bridge/API URL.
 
-### TypeScript SDK
+## Other Surfaces
 
-Use `@zcouncil/sdk` when building zcouncil into application code or scripts.
+zcouncil also supports web, MCP, HTTP API, SDK, and Pi integrations. This skill intentionally focuses on CLI usage; for other surfaces, read the docs:
 
-Install:
-
-```sh
-npm install @zcouncil/sdk
+```txt
+https://zcouncil.com/docs
+https://zcouncil.com/docs/cli
 ```
-
-Basic usage:
-
-```ts
-import { ZCouncilClient } from "@zcouncil/sdk"
-
-const zcouncil = new ZCouncilClient({
-  token: process.env.ZCOUNCIL_TOKEN!,
-})
-
-const answer = await zcouncil.run("Review this architecture")
-```
-
-API:
-
-```ts
-await zcouncil.run(input)
-await zcouncil.ask(memberId, input)
-await zcouncil.members()
-await zcouncil.profiles()
-```
-
-Use normal JavaScript concurrency to ask multiple members:
-
-```ts
-const [critique, rollout] = await Promise.all([
-  zcouncil.ask("anthropic_claude_opus_4_7", "Deeply critique this plan"),
-  zcouncil.ask("openai_gpt_5_4_mini", "Suggest practical rollout steps"),
-])
-```
-
-Never hardcode tokens in source files. Use environment variables or the user-approved secret store for the runtime.
-
-## Quick decision guide
-
-- Use the web app for interactive council chats.
-- Use Pi's `zcouncil` tool inside Pi.
-- Use MCP when an MCP client should consult zcouncil as a tool.
-- Use `@zcouncil/cli` when an agent/script has shell access but no MCP setup, or when the user wants local Codex/Claude Code subscriptions to power supported members.
-- Use `@zcouncil/sdk` when building zcouncil into a TypeScript app, server, or script.
