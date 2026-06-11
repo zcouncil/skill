@@ -2,27 +2,17 @@
 name: zcouncil
 description: >
   Use zcouncil when a user wants multiple independent AI perspectives,
-  disagreement, model comparison, architecture/code/product review, or strategy
-  critique from an agent with shell access. Prefer the zcouncil CLI.
-version: 0.1.0
-license: MIT
+  disagreement, model comparison, architecture/code/product/research/strategy
+  review, tradeoff-heavy decision support, or critique before a high-stakes
+  implementation, migration, launch, or release.
 ---
 
 # zcouncil
 
-zcouncil runs a council of AI models from one prompt. Use the CLI when independent perspectives, disagreement, or model comparison are more valuable than a single synthesized answer.
-
-## When To Use
-
-Use zcouncil for:
-
-- architecture, code, design, product, research, or strategy reviews
-- decisions where dissent and tradeoffs are useful
-- comparing how different models reason about the same context
-- critique before a high-stakes implementation, migration, launch, or release
-- asking specialist members separately and synthesizing the results yourself
-
-Do not use zcouncil for simple factual questions that one model can answer directly.
+zcouncil runs a council of AI models from one prompt. Use it when independent
+perspectives, disagreement, or model comparison are more valuable than a single
+synthesized answer. Do not use zcouncil for simple factual questions that one
+model can answer directly.
 
 ## Prompting
 
@@ -40,11 +30,10 @@ Avoid:
 - Leading members toward your preferred answer.
 - Hiding context that weakens one option.
 - Asking council members merely to agree with a plan.
-- Sending secrets, credentials, customer data, or regulated data unless the user explicitly authorizes it and the selected zcouncil deployment is appropriate for that data.
+- Sending secrets, credentials, or customer data unless the user explicitly
+  authorizes it for this deployment.
 
 ## CLI
-
-Prefer `@zcouncil/cli` from shell-capable agents.
 
 Start with help:
 
@@ -98,7 +87,9 @@ If auth is missing, direct the user to create a token at:
 https://zcouncil.com/chat?action=new-token
 ```
 
-Do not ask for or accept zcouncil API tokens in chat.
+Use the CLI's normal auth resolution. Do not read, print, copy, or pass token
+files from `~/.zcouncil` yourself. Do not ask for or accept zcouncil API tokens
+in chat or tool arguments.
 
 To let zcouncil route supported members through local Codex or Claude Code subscriptions, start the bridge:
 
@@ -106,12 +97,15 @@ To let zcouncil route supported members through local Codex or Claude Code subsc
 npm i -g @openai/codex
 codex login
 claude setup-token
-npx -y @zcouncil/cli bridge
+npx -y @zcouncil/cli bridge daemon start
 ```
 
-Leave the bridge running while using zcouncil. If the terminal closes, the local bridge disconnects and hosted routing continues for models that support it.
+Use `npx -y @zcouncil/cli bridge daemon status` to check it and
+`npx -y @zcouncil/cli bridge daemon stop` to disconnect local routing. Hosted
+routing continues for models that support it when the bridge is stopped.
 
-The zcouncil API token is stored locally under `~/.zcouncil/tokens/`, scoped by bridge/API URL.
+The zcouncil API token is stored locally under `~/.zcouncil/tokens/`, scoped by
+bridge/API URL. Treat those files as credentials; let the CLI read them.
 
 ## Other Surfaces
 
