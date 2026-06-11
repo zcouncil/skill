@@ -66,20 +66,13 @@ npx -y @zcouncil/cli members --json
 npx -y @zcouncil/cli profiles --json
 ```
 
-Run code mode when the user needs scripted council calls:
+Check the local setup when something misbehaves:
 
 ```sh
-npx -y @zcouncil/cli exec 'return council.run("Review this architecture")'
+npx -y @zcouncil/cli doctor
 ```
 
-Read from a file or stdin for longer code:
-
-```sh
-npx -y @zcouncil/cli exec ./review.mjs
-npx -y @zcouncil/cli exec - < review.mjs
-```
-
-## Auth And Bridge
+## Auth
 
 If auth is missing, direct the user to create a token at:
 
@@ -90,22 +83,6 @@ https://zcouncil.com/chat?action=new-token
 Use the CLI's normal auth resolution. Do not read, print, copy, or pass token
 files from `~/.zcouncil` yourself. Do not ask for or accept zcouncil API tokens
 in chat or tool arguments.
-
-To let zcouncil route supported members through local Codex or Claude Code subscriptions, start the bridge:
-
-```sh
-npm i -g @openai/codex
-codex login
-claude setup-token
-npx -y @zcouncil/cli bridge daemon start
-```
-
-Use `npx -y @zcouncil/cli bridge daemon status` to check it and
-`npx -y @zcouncil/cli bridge daemon stop` to disconnect local routing. Hosted
-routing continues for models that support it when the bridge is stopped.
-
-The zcouncil API token is stored locally under `~/.zcouncil/tokens/`, scoped by
-bridge/API URL. Treat those files as credentials; let the CLI read them.
 
 ## Other Surfaces
 
