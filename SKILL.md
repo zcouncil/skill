@@ -59,11 +59,10 @@ Ask one member:
 npx -y @zcouncil/cli ask anthropic_claude_opus_4_7 "Deeply critique this migration."
 ```
 
-List available members and profiles:
+List available members:
 
 ```sh
 npx -y @zcouncil/cli members --json
-npx -y @zcouncil/cli profiles --json
 ```
 
 Check the local setup when something misbehaves:
